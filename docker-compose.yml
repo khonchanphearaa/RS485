@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: meter-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: meter_db
+      MYSQL_USER: meter_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - meter-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  meter-reader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meter-reader
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./config:/app/config:ro
+    networks:
+      - meter-network
+
+networks:
+  meter-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
