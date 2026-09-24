@@ -212,3 +212,17 @@ bool modbus_tcp_read_register(
     return true;
 
 }
+
+void modbus_tcp_disconnect(ModbusTcpClient *client) {
+    if (client && client->sockfd >= 0) {
+        close(client->sockfd);
+        client->sockfd = -1;
+        client->connected = false;
+
+        printf("disconnected from Modbus geteways\n");
+    }
+}
+
+bool modbus_tcp_is_connected(ModbusTcpClient *client) {
+    return client && client->connected;
+}
