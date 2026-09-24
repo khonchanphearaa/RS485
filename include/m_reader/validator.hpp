@@ -7,31 +7,16 @@
 
 namespace meter_reader {
 
-/**
- * @brief Data validation service
- * 
- * Validates meter readings for anomalies, outliers, and physical limits.
- */
+
 class Validator {
 public:
     explicit Validator(const m_reader::MeterConfig& config);
     
-    /**
-     * @brief Validate a reading
-     * @param value Reading value in engineering units
-     * @param timestamp Reading timestamp
-     * @return std::nullopt if valid, error message if invalid
-     */
     std::optional<std::string> validate(
         double value,
         std::chrono::system_clock::time_point timestamp
     );
     
-    /**
-     * @brief Check if value should be saved (deadband filter)
-     * @param value Current reading
-     * @return true if should save, false if within deadband
-     */
     bool shouldStore(double value);
     
 private:
