@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts (cmake output, not source)
+cmake-build/
+bin/
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+docs/
+README.md
+
+# Scripts
+scripts/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
