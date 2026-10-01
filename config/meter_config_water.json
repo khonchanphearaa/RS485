@@ -1,0 +1,23 @@
+{
+  "meter": {
+    "meter_id": "WATER_001",
+    "gateway_ip": "192.168.4.101",
+    "gateway_port": 8886,
+    "meter_slave_id": 1,
+    "register_address": 0,
+    "multiplier": 0.001,
+    "unit": "m³",
+    "polling_interval_seconds": 600,
+    "deadband_threshold": 0.01,
+    "max_value": 1000000.0,
+    "max_rate_of_change": 100.0
+  },
+  "database": {
+    "host": "mysql",
+    "port": 3306,
+    "database": "meter_db",
+    "user": "meter_user",
+    "password": "${DB_PASSWORD}"
+  },
+  "log_level": "INFO"
+}
