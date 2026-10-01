@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,34 +33,45 @@ void modbus_tcp_destroy(ModbusTcpClient* client) {
 bool modbus_tcp_connect(ModbusTcpClient* client, const char* ip, int port) {
     if (!client || !ip) return false;
     
-    client->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    char port_str[16];
+    snprintf(port_str, sizeof(port_str), "%d", port);
+    
+    struct addrinfo hints, *res, *p;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    int status = getaddrinfo(ip, port_str, &hints, &res);
+    if (status != 0) {
+        fprintf(stderr, "Failed to resolve gateway address '%s': %s\n", ip, gai_strerror(status));
+        return false;
+    }
+    
+    client->sockfd = -1;
+    for (p = res; p != NULL; p = p->ai_next) {
+        client->sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (client->sockfd < 0) {
+            continue;
+        }
+        
+        struct timeval timeout;
+        timeout.tv_sec = 5;
+        timeout.tv_usec = 0;
+        setsockopt(client->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        setsockopt(client->sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+        
+        if (connect(client->sockfd, p->ai_addr, p->ai_addrlen) == 0) {
+            break;
+        }
+        
+        close(client->sockfd);
+        client->sockfd = -1;
+    }
+    
+    freeaddrinfo(res);
+    
     if (client->sockfd < 0) {
-        perror("Socket creation failed");
-        return false;
-    }
-    
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    
-    if (inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0) {
-        perror("Invalid IP address");
-        close(client->sockfd);
-        client->sockfd = -1;
-        return false;
-    }
-    
-    struct timeval timeout;
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
-    setsockopt(client->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-    setsockopt(client->sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-    
-    if (connect(client->sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Connection failed");
-        close(client->sockfd);
-        client->sockfd = -1;
+        perror("Connection to Modbus gateway failed");
         return false;
     }
     
