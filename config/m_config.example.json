@@ -1,0 +1,24 @@
+{
+  "meter": {
+    "meter_id": "####",
+    "gateway_ip": "####",
+    "gateway_port": ####,
+    "meter_slave_id": ####,
+    "register_address": ####,
+    "multiplier": ####,
+    "unit": "####",
+    "polling_interval_seconds": ####,      
+    "deadband_threshold": ####,
+    "max_value": ####,
+    "max_rate_of_change": ####
+  },
+  "database": {
+    "host": "####",
+    "port": 3306,
+    "database": "####",
+    "user": "####",
+    "password": "####"
+  },
+  "log_level": "INFO"
+}
+
