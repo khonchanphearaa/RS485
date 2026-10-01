@@ -15,41 +15,50 @@ static std::string trim(const std::string& str) {
 
 static std::string extractValue(const std::string& json, const std::string& key) {
     std::string search_key = "\"" + key + "\"";
-    size_t pos = json.find(search_key);
-    if (pos == std::string::npos) {
-        throw std::runtime_error("Key not found: " + key);
-    }
-    
-    pos = json.find(':', pos);
-    if (pos == std::string::npos) {
-        throw std::runtime_error("Invalid JSON format");
-    }
-    
-    pos++;
-    
-    while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n')) {
-        pos++;
-    }
-    
-    if (pos >= json.size()) {
-        throw std::runtime_error("Unexpected end of JSON");
-    }
-    
-    if (json[pos] == '"') {
-        pos++;
-        size_t end = json.find('"', pos);
-        if (end == std::string::npos) {
-            throw std::runtime_error("Unterminated string");
+    size_t search_from = 0;
+    while (true) {
+        size_t pos = json.find(search_key, search_from);
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Key not found: " + key);
         }
-        return json.substr(pos, end - pos);
+        
+        pos = json.find(':', pos);
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Invalid JSON format");
+        }
+        
+        pos++;
+        
+        while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n' || json[pos] == '\r')) {
+            pos++;
+        }
+        
+        if (pos >= json.size()) {
+            throw std::runtime_error("Unexpected end of JSON");
+        }
+        
+        // If value is an object or array (e.g. "database": { ), skip and find the next key occurrence
+        if (json[pos] == '{' || json[pos] == '[') {
+            search_from = pos + 1;
+            continue;
+        }
+        
+        if (json[pos] == '"') {
+            pos++;
+            size_t end = json.find('"', pos);
+            if (end == std::string::npos) {
+                throw std::runtime_error("Unterminated string");
+            }
+            return json.substr(pos, end - pos);
+        }
+        
+        size_t end = pos;
+        while (end < json.size() && json[end] != ',' && json[end] != '}' && json[end] != '\n' && json[end] != '\r') {
+            end++;
+        }
+        
+        return trim(json.substr(pos, end - pos));
     }
-    
-    size_t end = pos;
-    while (end < json.size() && json[end] != ',' && json[end] != '}' && json[end] != '\n') {
-        end++;
-    }
-    
-    return trim(json.substr(pos, end - pos));
 }
 
 m_reader::AppConfig load_config(const std::string& config_path) {
