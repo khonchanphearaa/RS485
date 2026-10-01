@@ -1,0 +1,12 @@
+CompileFlags:
+  Add: [-Iinclude]
+---
+If:
+  PathMatch: .*\.(cpp|hpp|cc|cxx)
+CompileFlags:
+  Add: [-std=c++17]
+---
+If:
+  PathMatch: .*\.(c|h)
+CompileFlags:
+  Add: [-std=c11]
