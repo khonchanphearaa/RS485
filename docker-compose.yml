@@ -1,4 +1,8 @@
+version: '3.8'
+
 services:
+
+  # database
   mysql:
     image: mysql:8.0
     container_name: meter-db
@@ -21,11 +25,12 @@ services:
       timeout: 5s
       retries: 3
 
-  meter-reader:
+  # water-reader meter
+  w-reader:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: meter-reader
+    container_name: w-reader
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -35,13 +40,46 @@ services:
     environment:
       - DB_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - ./config:/app/config:ro
+      - ./config/meter_config_water.json:/app/config/meter_config.json:ro
     networks:
       - meter-network
+      - host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # electric-reader meter
+  e-reader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: e-reader
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./config/meter_config_electric.json:/app/config/meter_config.json:ro
+    networks:
+      - meter-network
+      - host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   meter-network:
     driver: bridge
+  host:
+    external: true
 
 volumes:
   mysql_data:
