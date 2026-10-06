@@ -29,7 +29,7 @@ class MeterReading:
             "value": self.value,
             "unit": self.unit,
             "timestamp": self.timestamp.isoformat(),
-            "created_at": self.crate_at.isoformat()
+            "created_at": self.created_at.isoformat()
         }
 
 
