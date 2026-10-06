@@ -5,6 +5,11 @@ Define based on meter-reader via reading daemon that polls meters via Modbus TCP
 - cost savings via deadband filtering (60-80% fewer database writes)
 - real-time monitoring
 
+## Images
+
+| Front View | Back View |
+| :---: | :---: |
+| <img src="./docs/assets/images/RS485_Front.jpg" width="300"> | <img src="./docs/assets/images/RS485_Back.jpg" width="300"> |
 
 ### Requirement:
 
