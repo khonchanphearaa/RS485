@@ -1,5 +1,8 @@
 
 #include "../include/network.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -11,7 +14,7 @@
 #include <sys/time.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <linux/sockios.h>
+// #include <linux/sockios.h>
 
 
 #define DEFAULT_TIMEOUT 5
@@ -68,4 +71,67 @@ NetworkResult test_tcp_conn(const NetworkConfig* config) {
         
     close(sockfd);
     return NET_SUCCESS;
+}
+
+
+bool ping_host(const char* host, int timeout_seconds){
+    
+    /* implement using system ping for production, raw ICMP sockets */
+    char command[256];
+    snprintf(
+        command, sizeof(command),
+        "ping -c 1 -W %d %s > /dev/null 2>&1",
+        timeout_seconds, host
+    );
+
+    int result = system(command);
+    return (result == 0);   
+}
+
+
+const char* network_msg(NetworkResult result){
+    switch (result) {
+        case NET_SUCCESS: 
+            return "Success";
+        case NET_ERROR_INVALID_IP: 
+            return "Invalid ip address";
+        case NET_ERROR_DNS:
+            return "DNS resolution failed";
+        case NET_ERROR_CONNECT:
+            return "Conn failed";
+        case NET_ERROR_TIMEOUT:
+            return "Conn timeout";
+        case NET_ERROR_SOCKET:
+            return "Socket creation failed";
+        default:
+            return "Unknown error";
+    }
+}
+
+
+bool config_static_ip(
+    const char* interface,
+    const char* ip_addr,
+    const char* netmask
+){
+    if(!interface || !ip_addr || !netmask){
+        fprintf(stderr, "Invalid network conifg parameter\n");
+        return  false;
+    }
+
+    /* use system commands, netlink sockets */
+    char cmd[512];
+    snprintf(
+        cmd, sizeof(cmd),
+        "sudo ifconfig %s %s netmark %s up",
+        interface, ip_addr, netmask
+    );
+
+    if (system(cmd) != 0){
+        fprintf(stderr, "Faild to conifg ip address\n");
+        return false;
+    }
+
+    printf("conifg %s with IP %s netmark %s\n", interface, ip_addr, netmask);
+    return  true;
 }
