@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 # Configure MinIPC network for direct E810-DTU connection
-# Senior-level: Safe, documented, reversible
 #
 
 set -e

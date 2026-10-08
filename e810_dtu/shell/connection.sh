@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 # E810-DTU Full Connection Test Script
-# Senior-level: Comprehensive, well-documented, user-friendly
 #
 
 set -e
