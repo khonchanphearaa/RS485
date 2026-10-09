@@ -5,11 +5,11 @@
 
 set -e
 
-# Colors for output
+# Colors 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Configuration
 E810_IP="${E810_IP:-192.168.4.101}"
