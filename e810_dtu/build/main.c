@@ -1,3 +1,10 @@
+/*
+* Main program running applications from cli inteface 
+* tests based on RS485 connection to e810-dtu 
+* version 1.0.0
+* date: 09/10/2026
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
