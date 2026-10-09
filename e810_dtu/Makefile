@@ -1,5 +1,4 @@
 # Makefile for E810-DTU Test Tool
-# Senior-level: Clean, modular, well-documented
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -O2
